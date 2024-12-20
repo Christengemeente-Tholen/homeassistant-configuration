@@ -1,0 +1,141 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+sensor: !include_dir_merge_list sensor/
+
+http:
+  # For extra security set this to only accept connections on localhost if NGINX is on the same machine
+  # Uncommenting this will mean that you can only reach Home Assistant using the proxy, not directly via IP from other clients.
+  # server_host: 127.0.0.1
+  use_x_forwarded_for: true
+  # You must set the trusted proxy IP address so that Home Assistant will properly accept connections
+  # Set this to your NGINX machine IP, or localhost if hosted on the same machine.
+  trusted_proxies:
+    - 172.30.33.0/24
+
+homeassistant:
+  external_url: !secret external_url
+
+panel_custom:
+  - name: Supervisor
+    url_path: hassio/system
+    sidebar_title: Supervisor
+    sidebar_icon: mdi:home-assistant
+    module_url: /local/panel-redirect.js
+
+switch:
+  - platform: template
+    switches:
+      trandelion:
+        friendly_name: Trandelion
+        value_template: "{{ is_state('input_select.trandelion', 'Enabled') }}"
+        turn_on:
+          action: input_select.select_option
+          target:
+            entity_id: input_select.trandelion
+          data:
+            option: "Enable"
+        turn_off:
+          action: input_select.select_option
+          target:
+            entity_id: input_select.trandelion
+          data:
+            option: "Disable"
+
+input_select:
+  trandelion:
+    name: Trandelion
+    options:
+      - Enable
+      - Disable
+      - Disabled
+      - Enabled
+    initial: Disabled
+    icon: mdi:translate
+
+binary_sensor:
+    - platform: template
+      sensors:
+        ptz_camera_state:
+          friendly_name: "PTZ Camera status"
+          value_template: >-
+            {% if is_state("sensor.ptz_standby_state", "1") %}
+              Standby
+            {% else %}
+              Geactiveerd
+            {% endif %}
+          icon_template: >-
+            {% if is_state("sensor.ptz_standby_state", "1") %}
+              mdi:cctv-off
+            {% else %}
+              mdi:cctv
+            {% endif %}
+        
+template:
+  - sensor:
+    - name: "WAN Down Throughput"
+      unique_id: wan_down_throughput
+      unit_of_measurement: Mbps
+      icon: mdi:cloud-download
+      # Convert throughput derivative from Bps to Mbps
+      state: "{{ ((states('sensor.network_wan_down_throughput_bps') | int) * 8 / 10**6) | round(2) }}"
+      state_class: measurement
+    
+    - name: "WAN Down Usage"
+      unique_id: wan_down_usage
+      unit_of_measurement: GiB
+      icon: mdi:cloud-download
+      # Convert usage meter below from B to GiB
+      state: "{{ ((states('sensor.network_wan_down_data_usage_meter_bytes') | int) / 2**30) | round(2) }}"
+      state_class: total_increasing
+      
+    - name: "WAN Up Throughput"
+      unique_id: wan_up_throughput
+      unit_of_measurement: Mbps
+      icon: mdi:cloud-upload
+      # Convert throughput derivative from Bps to Mbps
+      state: "{{ ((states('sensor.network_wan_up_throughput_bps') | int) * 8 / 10**6) | round(2) }}"
+      state_class: measurement
+    
+    - name: "WAN Up Usage"
+      unique_id: wan_up_usage
+      unit_of_measurement: GiB
+      icon: mdi:cloud-upload
+      # Convert usage meter below from B to GiB
+      state: "{{ ((states('sensor.network_wan_up_data_usage_meter_bytes') | int) / 2**30) | round(2) }}"
+      state_class: total_increasing
+      
+    
+utility_meter:
+  network_wan_down_data_usage_meter_bytes:
+    unique_id: network_wan_down_data_usage_meter_bytes
+    name: Network - WAN Down Data Usage Meter - Bytes
+    source: sensor.wan_interface_down_octets
+    cycle: monthly
+    offset:
+      hours: 72
+      minutes: 0
+      seconds: 0
+  network_wan_up_data_usage_meter_bytes:
+    unique_id: network_wan_up_data_usage_meter_bytes
+    name: Network - WAN Up Data Usage Meter - Bytes
+    source: sensor.wan_interface_up_octets
+    cycle: monthly
+    offset:
+      hours: 72
+      minutes: 0
+      seconds: 0
+      
+light:
+  - platform: ics_2000
+    username: !secret ics_2000_username
+    password: !secret ics_2000_password
+

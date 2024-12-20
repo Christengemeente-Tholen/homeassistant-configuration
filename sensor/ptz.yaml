@@ -1,0 +1,8 @@
+  - platform: rest
+    resource: http://172.16.0.9/cgi-bin/param.cgi?get_language_conf
+    name: "PTZ Standby state"
+    username: !secret camera_username
+    password: !secret camera_password
+    authentication: digest
+    value_template: '{{value.split("\n")[4].split("\"")[1]}}' 
+    unique_id: ptz_standby_state
