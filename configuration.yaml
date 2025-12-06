@@ -136,3 +136,8 @@ light:
   - platform: ics_2000
     username: !secret ics_2000_username
     password: !secret ics_2000_password
+
+switch:
+  - platform: ics_2000
+    username: !secret ics_2000_username
+    password: !secret ics_2000_password
