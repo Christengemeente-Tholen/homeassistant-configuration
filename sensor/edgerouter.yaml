@@ -6,7 +6,8 @@
     community: public
     # ifHCInOctets G0/0/0. 
     # Running total of octects (Bytes) going into the interface since router reboot.
-    baseoid: 1.3.6.1.2.1.31.1.1.1.6.4
+    #  baseoid: 1.3.6.1.2.1.31.1.1.1.6.4 # edgerouter
+    baseoid: 1.3.6.1.2.1.31.1.1.1.6.2    # usg pro 4
     state_class: total_increasing
     icon: mdi:cloud-download
     unit_of_measurement: "B"
@@ -18,7 +19,8 @@
     community: public
     # ifHCInOctets G0/0/0. 
     # Running total of octects (Bytes) going into the interface since router reboot.
-    baseoid: 1.3.6.1.2.1.31.1.1.1.10.4
+    baseoid: 1.3.6.1.2.1.31.1.1.1.10.2  # usg pro 4
+    #baseoid: 1.3.6.1.2.1.31.1.1.1.10.4 # edgerouter
     state_class: total_increasing
     icon: mdi:cloud-up
     unit_of_measurement: "B"
