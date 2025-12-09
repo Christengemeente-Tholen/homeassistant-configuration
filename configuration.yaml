@@ -131,13 +131,3 @@ utility_meter:
       hours: 72
       minutes: 0
       seconds: 0
-      
-light:
-  - platform: ics_2000
-    username: !secret ics_2000_username
-    password: !secret ics_2000_password
-
-switch:
-  - platform: ics_2000
-    username: !secret ics_2000_username
-    password: !secret ics_2000_password
