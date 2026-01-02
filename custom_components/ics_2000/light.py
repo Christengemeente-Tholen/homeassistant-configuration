@@ -5,12 +5,15 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from .coordinator import ICS200Coordinator
 from ics_2000.entities import dim_device
 
 from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.core import callback
 
 from . import HubConfigEntry
 from .const import DOMAIN
@@ -26,50 +29,42 @@ async def async_setup_entry(
     """Setup the lights."""
     async_add_entities(
         [
-            DimmableLight(entity, entry.runtime_data.local_address)
-            for entity in entry.runtime_data.devices
+            DimmableLight(entry.runtime_data, entity,
+                          entry.runtime_data.hub.local_address)
+            for entity in entry.runtime_data.hub.devices
             if type(entity) is dim_device.DimDevice
         ]
     )
 
 
-class DimmableLight(LightEntity):
+class DimmableLight(CoordinatorEntity[ICS200Coordinator], LightEntity):
     """Representation of an dimmable light."""
 
     _attr_has_entity_name = True
     _attr_name = None
 
-    def __init__(self, light: dim_device.DimDevice, local_address: str | None) -> None:
+    def __init__(self, coordinator: ICS200Coordinator, light: dim_device.DimDevice, local_address: str | None) -> None:
         """Initialize an dimmable light."""
+        super().__init__(coordinator, context=str(light.entity_id))
         self._light = light
-        self._name = str(light.name)
-        self._state = False  # self._light.get_on_status()
-        self._brightness = 255  # self._light.get_dim_level()
+        self._state = False
+        self._brightness = None
         self._attr_color_mode = ColorMode.BRIGHTNESS
         self._local_address = local_address
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Return the device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._light.device_data.id)},
-            name=self.name,
-            model=self._light.device_config.model_name,
-            model_id=str(self._light.device_data.device),
-            sw_version=str(
-                self._light.device_data.data.get("module", {}).get("version", "")
-            ),
+        self._attr_unique_id = str(light.entity_id)
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, light.device_data.id)},
+            name=str(light.name),
+            model=light.device_config.model_name,
+            model_id=str(light.device_data.device),
+            sw_version=str(light.device_data.data.get(
+                "module", {}).get("version", "")),
         )
 
     @property
     def icon(self) -> str | None:
         """Icon of the entity."""
         return "mdi:lightbulb"
-
-    @property
-    def name(self) -> str:
-        """Return the display name of this light."""
-        return self._name
 
     @property
     def color_mode(self) -> ColorMode:
@@ -106,9 +101,13 @@ class DimmableLight(LightEntity):
             self._light.turn_off, self._local_address is not None
         )
 
-    async def async_update(self) -> None:
-        """Fetch new state data for this light."""
-        self._state = await self.hass.async_add_executor_job(self._light.get_on_status)
-        self._brightness = await self.hass.async_add_executor_job(
-            self._light.get_dim_level
-        )
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        status = self.coordinator.hub.device_statuses.get(
+            self._light.entity_id, [])
+        if self._light.device_config.on_off_function is not None:
+            self._state = status[self._light.device_config.on_off_function] == 1
+        if self._light.device_config.dim_function is not None:
+            self._brightness = status[self._light.device_config.dim_function]
+        self.async_write_ha_state()
