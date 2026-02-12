@@ -1,4 +1,3 @@
-
 # Loads default set of integrations. Do not remove.
 default_config:
 
@@ -24,6 +23,22 @@ http:
 homeassistant:
   external_url: !secret external_url
 
+ingress:
+  camera:
+    require_admin: true
+    work_mode: ingress
+    ui_mode: normal
+    title: Camera
+    icon: mdi:network
+    url: http://172.16.0.9
+    headers:
+      http-auth-user: !secret camera_username
+      http-auth-pass: !secret camera_password
+
+evohome:
+  username: !secret evohome_username
+  password: !secret evohome_password
+
 panel_custom:
   - name: Supervisor
     url_path: hassio/system
@@ -44,74 +59,73 @@ input_select:
 
 template:
   - binary_sensor:
-    - default_entity_id: binary_sensor.ptz_camera_state
-      name: PTZ Camera status
-      state: >-
-        {% if is_state("sensor.ptz_standby_state", "1") %}
-          Standby
-        {% else %}
-          Geactiveerd
-        {% endif %}
-      icon: >-
-        {% if is_state("sensor.ptz_standby_state", "1") %}
-          mdi:cctv-off
-        {% else %}
-          mdi:cctv
-        {% endif %}
+      - default_entity_id: binary_sensor.ptz_camera_state
+        name: PTZ Camera status
+        state: >-
+          {% if is_state("sensor.ptz_standby_state", "1") %}
+            Standby
+          {% else %}
+            Geactiveerd
+          {% endif %}
+        icon: >-
+          {% if is_state("sensor.ptz_standby_state", "1") %}
+            mdi:cctv-off
+          {% else %}
+            mdi:cctv
+          {% endif %}
 
   - switch:
-    - turn_on:
-      - action: input_select.select_option
-        target:
-          entity_id:
-          - input_select.trandelion
-        data:
-          option: Enable
-      turn_off:
-      - action: input_select.select_option
-        target:
-          entity_id:
-          - input_select.trandelion
-        data:
-          option: Disable
-      default_entity_id: switch.trandelion
-      name: Trandelion
-      state: '{{ is_state(''input_select.trandelion'', ''Enabled'') }}'
+      - turn_on:
+          - action: input_select.select_option
+            target:
+              entity_id:
+                - input_select.trandelion
+            data:
+              option: Enable
+        turn_off:
+          - action: input_select.select_option
+            target:
+              entity_id:
+                - input_select.trandelion
+            data:
+              option: Disable
+        default_entity_id: switch.trandelion
+        name: Trandelion
+        state: "{{ is_state('input_select.trandelion', 'Enabled') }}"
 
   - sensor:
-    - name: "WAN Down Throughput"
-      unique_id: wan_down_throughput
-      unit_of_measurement: Mbps
-      icon: mdi:cloud-download
-      # Convert throughput derivative from Bps to Mbps
-      state: "{{ ((states('sensor.network_wan_down_throughput_bps') | int) * 8 / 10**6) | round(2) }}"
-      state_class: measurement
-    
-    - name: "WAN Down Usage"
-      unique_id: wan_down_usage
-      unit_of_measurement: GiB
-      icon: mdi:cloud-download
-      # Convert usage meter below from B to GiB
-      state: "{{ ((states('sensor.network_wan_down_data_usage_meter_bytes') | int) / 2**30) | round(2) }}"
-      state_class: total_increasing
-      
-    - name: "WAN Up Throughput"
-      unique_id: wan_up_throughput
-      unit_of_measurement: Mbps
-      icon: mdi:cloud-upload
-      # Convert throughput derivative from Bps to Mbps
-      state: "{{ ((states('sensor.network_wan_up_throughput_bps') | int) * 8 / 10**6) | round(2) }}"
-      state_class: measurement
-    
-    - name: "WAN Up Usage"
-      unique_id: wan_up_usage
-      unit_of_measurement: GiB
-      icon: mdi:cloud-upload
-      # Convert usage meter below from B to GiB
-      state: "{{ ((states('sensor.network_wan_up_data_usage_meter_bytes') | int) / 2**30) | round(2) }}"
-      state_class: total_increasing
-      
-    
+      - name: "WAN Down Throughput"
+        unique_id: wan_down_throughput
+        unit_of_measurement: Mbps
+        icon: mdi:cloud-download
+        # Convert throughput derivative from Bps to Mbps
+        state: "{{ ((states('sensor.network_wan_down_throughput_bps') | int) * 8 / 10**6) | round(2) }}"
+        state_class: measurement
+
+      - name: "WAN Down Usage"
+        unique_id: wan_down_usage
+        unit_of_measurement: GiB
+        icon: mdi:cloud-download
+        # Convert usage meter below from B to GiB
+        state: "{{ ((states('sensor.network_wan_down_data_usage_meter_bytes') | int) / 2**30) | round(2) }}"
+        state_class: total_increasing
+
+      - name: "WAN Up Throughput"
+        unique_id: wan_up_throughput
+        unit_of_measurement: Mbps
+        icon: mdi:cloud-upload
+        # Convert throughput derivative from Bps to Mbps
+        state: "{{ ((states('sensor.network_wan_up_throughput_bps') | int) * 8 / 10**6) | round(2) }}"
+        state_class: measurement
+
+      - name: "WAN Up Usage"
+        unique_id: wan_up_usage
+        unit_of_measurement: GiB
+        icon: mdi:cloud-upload
+        # Convert usage meter below from B to GiB
+        state: "{{ ((states('sensor.network_wan_up_data_usage_meter_bytes') | int) / 2**30) | round(2) }}"
+        state_class: total_increasing
+
 utility_meter:
   network_wan_down_data_usage_meter_bytes:
     unique_id: network_wan_down_data_usage_meter_bytes
@@ -131,3 +145,5 @@ utility_meter:
       hours: 72
       minutes: 0
       seconds: 0
+
+google_assistant: !include google_assistant_integ.yaml

@@ -14,3 +14,5 @@ harmony_harmony_hub.conf
 known_devices.yaml
 custom_components/hacs
 custom_components/ingress
+google_assistant_integ.yaml
+SERVICE_ACCOUNT.json
