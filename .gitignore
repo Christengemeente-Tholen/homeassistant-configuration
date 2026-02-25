@@ -16,3 +16,4 @@ custom_components/hacs
 custom_components/ingress
 google_assistant_integ.yaml
 SERVICE_ACCOUNT.json
+matrix
