@@ -1,1 +1,20 @@
-[]
+- id: '1788603333210'
+  alias: Move PTZ-camera to record position
+  description: ''
+  triggers:
+  - trigger: time
+    at: 03:00:00
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+    - sun
+  conditions: []
+  actions:
+  - action: rest_command.cam_pos_9_command
+    metadata: {}
+    data: {}
+  mode: single

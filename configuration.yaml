@@ -10,30 +10,108 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 sensor: !include_dir_merge_list sensor/
 
-http:
-  # For extra security set this to only accept connections on localhost if NGINX is on the same machine
-  # Uncommenting this will mean that you can only reach Home Assistant using the proxy, not directly via IP from other clients.
-  # server_host: 127.0.0.1
-  use_x_forwarded_for: true
-  # You must set the trusted proxy IP address so that Home Assistant will properly accept connections
-  # Set this to your NGINX machine IP, or localhost if hosted on the same machine.
-  trusted_proxies:
-    - 172.30.33.0/24
-
 homeassistant:
   external_url: !secret external_url
 
-ingress:
-  camera:
-    require_admin: true
-    work_mode: ingress
-    ui_mode: normal
-    title: Camera
-    icon: mdi:network
-    url: http://172.16.0.9
-    headers:
-      http-auth-user: !secret camera_username
-      http-auth-pass: !secret camera_password
+rest_command:
+  vmix_cam_command:
+    url: "http://172.16.1.1:8088/?shortcut=0fde578a-508a-4419-9ee9-97700d93cbb8"
+    username: !secret vmix_username
+    password: !secret vmix_password
+  vmix_mon_command:
+    url: "http://172.16.1.1:8088/?shortcut=089d867f-6c6e-411b-9d38-0e4f08988ab9"
+    username: !secret vmix_username
+    password: !secret vmix_password
+  vmix_mon_cam_command:
+    url: "http://172.16.1.1:8088/?shortcut=7f11e7bf-222c-4f4b-a1c8-3218e84cca77"
+    username: !secret vmix_username
+    password: !secret vmix_password
+  vmix_cam_mon_command:
+    url: "http://172.16.1.1:8088/?shortcut=3ba0aa7e-9ab3-409d-8661-c5b23b9a2cc9"
+    username: !secret vmix_username
+    password: !secret vmix_password
+  cam_pos_1_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&1"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+  cam_pos_2_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&2"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+  cam_pos_3_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&3"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+  cam_pos_4_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&4"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+  cam_pos_5_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&5"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+  cam_pos_6_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&6"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+  cam_pos_7_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&7"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+  cam_pos_8_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&8"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+  cam_pos_9_command:
+    method: GET
+    url: "http://172.16.0.9/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&9"
+    authentication: digest
+    username: !secret camera_username
+    password: !secret camera_password
+
+# ingress:
+#   camera:
+#     require_admin: true
+#     work_mode: ingress
+#     ui_mode: normal
+#     title: Camera
+#     icon: mdi:network
+#     url: http://172.16.0.9/
+#     headers:
+#       http-auth-user: !secret camera_username
+#       http-auth-pass: !secret camera_password
+# companion:
+#   work_mode: ingress
+#   ui_mode: normal
+#   title: Companion
+#   icon: mdi:button-pointer
+#   url: http://172.16.1.1:8888
+#   index: /emulator/emulator
+#   rewrite:
+#     - mode: body
+#       match: (\/assets\/index-.*\.(js|css))
+#       replace: $http_x_ingress_path\1
+
+camera:
+  - platform: ffmpeg
+    name: vmix
+    input: srt://172.16.1.1:10000
 
 evohome:
   username: !secret evohome_username
@@ -147,3 +225,10 @@ utility_meter:
       seconds: 0
 
 google_assistant: !include google_assistant_integ.yaml
+
+auth_oidc:
+  client_id: !secret auth_oidc_client_id
+  discovery_url: !secret auth_oidc_discovery_url
+  client_secret: !secret auth_oidc_client_secret
+  features:
+    include_groups_scope: False

@@ -1,0 +1,54 @@
+cam_mov_pos_1_command:
+  alias: Move the camera to preset 1
+  sequence:
+  - action: rest_command.cam_pos_1_command
+    metadata: {}
+    data: {}
+cam_mov_pos_2_command:
+  alias: Move the camera to preset 2
+  sequence:
+  - action: rest_command.cam_pos_2_command
+    metadata: {}
+    data: {}
+cam_mov_pos_3_command:
+  alias: Move the camera to preset 3
+  sequence:
+  - action: rest_command.cam_pos_3_command
+    metadata: {}
+    data: {}
+cam_mov_pos_4_command:
+  alias: Move the camera to preset 4
+  sequence:
+  - action: rest_command.cam_pos_4_command
+    metadata: {}
+    data: {}
+cam_mov_pos_5_command:
+  alias: Move the camera to preset 5
+  sequence:
+  - action: rest_command.cam_pos_5_command
+    metadata: {}
+    data: {}
+cam_mov_pos_6_command:
+  alias: Move the camera to preset 6
+  sequence:
+  - action: rest_command.cam_pos_6_command
+    metadata: {}
+    data: {}
+cam_mov_pos_7_command:
+  alias: Move the camera to preset 7
+  sequence:
+  - action: rest_command.cam_pos_7_command
+    metadata: {}
+    data: {}
+cam_mov_pos_8_command:
+  alias: Move the camera to preset 8
+  sequence:
+  - action: rest_command.cam_pos_8_command
+    metadata: {}
+    data: {}
+cam_mov_pos_9_command:
+  alias: Move the camera to preset 9
+  sequence:
+  - action: rest_command.cam_pos_9_command
+    metadata: {}
+    data: {}
